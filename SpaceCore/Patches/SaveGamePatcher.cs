@@ -109,16 +109,22 @@ namespace SpaceCore.Patches
                     }
                 }
             }
-            if (ret.Count != 2)
+            foreach (var meth in typeof(LoadGameMenu).GetMethods(BindingFlags.Public|BindingFlags.NonPublic|BindingFlags.Static))
             {
-                Log.Warn($"{nameof(GetLoadEnumeratorMethods)}: Found {ret.Count} transpiler targets, expected 2");
+                if (meth.Name.Contains("<FindSaveGames>") && (meth.Name.Contains("TryReadSaveData") || meth.Name.Contains("TryReadSaveInfo")))
+                {
+                    ret.Add(meth);
+                }
+            }
+            if (ret.Count != 4)
+            {
+                Log.Warn($"{nameof(GetLoadEnumeratorMethods)}: Found {ret.Count} transpiler targets, expected 4");
                 foreach (var meth in ret)
                 {
                     Log.Trace("\t" + meth.Name + " " + meth);
                 }
             }
             ret.Add(AccessTools.Method(typeof(SaveGame), nameof(SaveGame.TryReadSaveFile)));
-            ret.Add(PatchHelper.RequireMethod<LoadGameMenu>("FindSaveGames"));
             return ret;
         }
 
@@ -213,15 +219,17 @@ namespace SpaceCore.Patches
             var newInsns = new List<CodeInstruction>();
             foreach (var insn in insns)
             {
-                if (insn.opcode == OpCodes.Callvirt && (insn.operand as MethodInfo).Name == nameof(XmlSerializer.Deserialize))
+                if (insn.opcode == OpCodes.Call && (insn.operand as MethodInfo).Name == nameof(SaveSerializer.Deserialize))
                 {
+                    var mtype = (insn.operand as MethodInfo).GetGenericArguments()[0];
+
                     insn.opcode = OpCodes.Call;
-                    insn.operand = PatchHelper.RequireMethod<SaveGamePatcher>(nameof(DeserializeProxy));
+                    insn.operand = typeof(SaveGamePatcher).GetMethod(nameof(DeserializeProxy), BindingFlags.NonPublic | BindingFlags.Static).MakeGenericMethod(mtype);
 
                     // We'll need the file path too since we can't use the current save constant.
                     if (original.DeclaringType == typeof(LoadGameMenu))
                     {
-                        newInsns.Add(new CodeInstruction(OpCodes.Ldloc_S, 5));
+                        newInsns.Add(new CodeInstruction(OpCodes.Ldfld, original.GetParameters().Last().ParameterType.GetField("pathToFile")));
                         newInsns.Add(new CodeInstruction(OpCodes.Ldc_I4_0));
                     }
                     else
@@ -250,7 +258,7 @@ namespace SpaceCore.Patches
                     continue;
                 }
 
-                if (insn.opcode == OpCodes.Callvirt && (insn.operand as MethodInfo).Name == "Serialize")
+                if (insn.opcode == OpCodes.Call && (insn.operand as MethodInfo).Name == "Serialize")
                 {
                     insn.opcode = OpCodes.Call;
                     insn.operand = PatchHelper.RequireMethod<SaveGamePatcher>(nameof(SerializeProxy));
@@ -322,33 +330,46 @@ namespace SpaceCore.Patches
                 SaveGamePatcher.RestoreModNodes(doc: doc, node: node.ChildNodes[i], modNodes: modNodes, curPath: $"{curPath}/{i}");
         }
 
-        private static object DeserializeProxy(XmlSerializer serializer, Stream stream, string farmerPath, bool fromSaveGame)
+        private static object DeserializeProxy<SType>(Stream stream, string farmerPath, bool fromSaveGame)
         {
-            // load XML
-            XmlDocument doc = new();
-            doc.Load(stream);
 
-            // get path to serialized SpaceCore data file
-            string filePath;
-            if (fromSaveGame)
+            var serializer = SaveSerializer.GetSerializer(typeof(SType));
+
+            try
             {
-                farmerPath = Path.Combine(Constants.SavesPath, SaveGamePatcher.SerializerManager.LoadFileContext);
-                string filename = serializer == SaveGame.farmerSerializer
-                    ? SaveGamePatcher.SerializerManager.FarmerFilename
-                    : SaveGamePatcher.SerializerManager.Filename;
-                filePath = Path.Combine(farmerPath, filename);
+                // load XML
+                XmlDocument doc = new();
+                doc.Load(stream);
+
+                // get path to serialized SpaceCore data file
+                string filePath;
+                if (fromSaveGame)
+                {
+                    farmerPath = Path.Combine(Constants.SavesPath, SaveGamePatcher.SerializerManager.LoadFileContext);
+                    string filename = typeof(SType) == typeof(Farmer)
+                        ? SaveGamePatcher.SerializerManager.FarmerFilename
+                        : SaveGamePatcher.SerializerManager.Filename;
+                    filePath = Path.Combine(farmerPath, filename);
+                }
+                else
+                    filePath = Path.Combine(Path.GetDirectoryName(farmerPath), SaveGamePatcher.SerializerManager.FarmerFilename);
+
+                // restore mod nodes
+                OptimizedModNodeList modNodes = OptimizedModNodeList.LoadFromFile(filePath);
+                if (modNodes.ModNodes.Any())
+                    SaveGamePatcher.RestoreModNodes(doc, doc, modNodes, "/1"); // <?xml ... ?> is 1
+
+                // deserialize XML
+                using var reader = new XmlTextReader(new StringReader(doc.OuterXml));
+                return serializer.Deserialize(reader);
             }
-            else
-                filePath = Path.Combine(Path.GetDirectoryName(farmerPath), SaveGamePatcher.SerializerManager.FarmerFilename);
-
-            // restore mod nodes
-            OptimizedModNodeList modNodes = OptimizedModNodeList.LoadFromFile(filePath);
-            if (modNodes.ModNodes.Any())
-                SaveGamePatcher.RestoreModNodes(doc, doc, modNodes, "/1"); // <?xml ... ?> is 1
-
-            // deserialize XML
-            using var reader = new XmlTextReader(new StringReader(doc.OuterXml));
-            return serializer.Deserialize(reader);
+            catch (Exception e)
+            {
+                Log.Warn("Failed to put mod data back into save, trying without it: " + e);
+                stream.Position = 0;
+                using var reader = new XmlTextReader(stream);
+                return serializer.Deserialize(reader);
+            }
         }
 
         /****
@@ -378,12 +399,13 @@ namespace SpaceCore.Patches
             return false;
         }
 
-        private static void SerializeProxy(XmlSerializer serializer, XmlWriter origWriter, object obj)
+        private static void SerializeProxy(XmlWriter origWriter, object obj)
         {
             //Log.trace( "Start serialize\t" + System.Diagnostics.Process.GetCurrentProcess().PrivateMemorySize64 );
             using var ms = new MemoryStream();
             using var writer = XmlWriter.Create(ms, new XmlWriterSettings { CloseOutput = false });
 
+            var serializer = SaveSerializer.GetSerializer(obj.GetType());
             serializer.Serialize(writer, obj);
             XmlDocument doc = new XmlDocument();
             ms.Position = 0;

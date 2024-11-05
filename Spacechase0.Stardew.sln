@@ -1433,5 +1433,8 @@ Global
 		SpaceShared\SpaceShared.projitems*{ddce02ff-e34c-47e0-b293-b90ac68ef2f4}*SharedItemsImports = 5
 		SpaceShared.Common\SpaceShared.Common.projitems*{ed79699d-06af-4b23-b60e-1bed2d06be8d}*SharedItemsImports = 5
 		SpaceShared\SpaceShared.projitems*{ed79699d-06af-4b23-b60e-1bed2d06be8d}*SharedItemsImports = 5
+		SpaceShared.Common\SpaceShared.Common.projitems*{eef5d802-f0a2-43b4-bd27-16b8262c4de4}*SharedItemsImports = 5
+		SpaceSharedPatching\SpaceSharedPatching.projitems*{eef5d802-f0a2-43b4-bd27-16b8262c4de4}*SharedItemsImports = 5
+		SpaceShared\SpaceShared.projitems*{eef5d802-f0a2-43b4-bd27-16b8262c4de4}*SharedItemsImports = 5
 	EndGlobalSection
 EndGlobal

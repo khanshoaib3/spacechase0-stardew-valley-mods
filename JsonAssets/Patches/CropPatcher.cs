@@ -116,7 +116,7 @@ namespace JsonAssets.Patches
 
         private static bool IsIndoorOnlyCrop(Crop crop)
         {
-            if ( crop.indexOfHarvest == "90" ) // Vanilla cactus fruit
+            if ( crop.indexOfHarvest.Value == "90" ) // Vanilla cactus fruit
                 return true;
 
             var cropData = Mod.instance.Crops.FirstOrDefault(c => crop.overrideTexturePath.Value == "JA\\Crop\\" + c.Name);
