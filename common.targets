@@ -4,7 +4,9 @@
     <Authors>spacechase0</Authors>
     <Description>...</Description>
     <UniqueId>spacechase0.$(AssemblyName)</UniqueId>
-
+    <MinimumApiVersion_Behavior>Update</MinimumApiVersion_Behavior>
+    <MinimumGameVersion_Behavior>UpdateFull</MinimumGameVersion_Behavior>
+    
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
 
     <LangVersion>latest</LangVersion>
@@ -15,7 +17,7 @@
   <!--import mod build package-->
   <ItemGroup>
     <PackageReference Include="Pathoschild.Stardew.ModBuildConfig" Version="4.1.2-casey" />
-    <PackageReference Include="Leclair.Stardew.ModManifestBuilder" Version="2.1.0" />
+    <PackageReference Include="Leclair.Stardew.ModManifestBuilder" Version="2.4.0" />
   </ItemGroup>
 
   <!-- Why didn't I do this for SpaceShared in the first place? -->

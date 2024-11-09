@@ -866,7 +866,7 @@ namespace SpaceCore.Dungeons
             var spawnDefs = Game1.content.Load<Dictionary<string, SpawnableDefinitionData>>("spacechase0.SpaceCore/SpawnableDefinitions");
             var spawnDef = spawnDefs[spawnId];
 
-            foreach (var drop in spawnDef.BreakableDrops.SimplifyDrops(__instance, who, r))
+            foreach (var drop in spawnDef.MinableDrops.SimplifyDrops(__instance, who, r))
                 Game1.createItemDebris(drop, new Vector2(x + 0.5f, y + 0.75f) * Game1.tileSize, who.FacingDirection, __instance);
 
             if (spawnDef.MinableExperienceGranted > 0)
@@ -899,7 +899,7 @@ namespace SpaceCore.Dungeons
                 __instance.fragility.Value = 2;
                 __instance.playNearbySoundAll("axchop");
 
-                foreach (var drop in spawnDef.BreakableDrops.SimplifyDrops(__instance.Location, t.getLastFarmerToUse(), Game1.random))
+                foreach (var drop in spawnDef.MinableDrops.SimplifyDrops(__instance.Location, t.getLastFarmerToUse(), Game1.random))
                     Game1.createItemDebris(drop, new Vector2(__instance.TileLocation.X + 0.5f, __instance.TileLocation.Y + 0.75f) * Game1.tileSize, t.getLastFarmerToUse().FacingDirection, location);
 
                 if (spawnDef.MinableExperienceGranted > 0)
