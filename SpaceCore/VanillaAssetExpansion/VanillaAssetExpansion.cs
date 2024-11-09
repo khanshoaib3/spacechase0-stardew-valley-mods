@@ -307,7 +307,9 @@ namespace SpaceCore.VanillaAssetExpansion
 
                 foreach (var tex in texs)
                 {
-                    tex.Value.TargetTexture += localeStr;
+                    string localeTex = tex.Value.TargetTexture + localeStr;
+                    if (Instance.Helper.GameContent.DoesAssetExist<Texture2D>(Instance.Helper.GameContent.ParseAssetName(localeTex)))
+                        tex.Value.TargetTexture = localeTex;
                     if (!SpriteBatchPatcher.packOverrides.ContainsKey(tex.Value.TargetTexture))
                         SpriteBatchPatcher.packOverrides.Add(tex.Value.TargetTexture, new());
                     SpriteBatchPatcher.packOverrides[tex.Value.TargetTexture].Add(tex.Value.TargetRect, tex.Value);
