@@ -12,7 +12,7 @@ using StardewValley.Menus;
 
 namespace Designs
 {
-    public class DesignMenu : IClickableMenu
+    public class DesignMenu : IClickableMenu, IDisposable
     {
         private Color[] pixels = new Color[ 16 * 16 ];
         private Texture2D pixelDisplay;
@@ -194,6 +194,11 @@ namespace Designs
                 ret.Add(new Rectangle(p.X, p.Y, 32, 32), new Color(255 / 5 * i, 255 / 5 * i, 255 / 5 * i));
             }
             return ret;
+        }
+
+        public void Dispose()
+        {
+            pixelDisplay?.Dispose();
         }
     }
 }
