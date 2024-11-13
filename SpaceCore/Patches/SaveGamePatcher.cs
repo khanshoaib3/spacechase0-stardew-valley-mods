@@ -100,7 +100,7 @@ namespace SpaceCore.Patches
                 {
                     foreach (var meth in type.GetMethods(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance))
                     {
-                        if (meth.Name.Contains("getLoadEnumerator"))
+                        if (meth.Name.Contains("getLoadEnumerator") && meth.GetParameters().Length == 0) // Latter check is to avoid things like the `<getLoadEnumerator>b__5` method introduced in 1.6.14
                         {
                             // A lambda inside the enumerator
                             ret.Add(meth);
