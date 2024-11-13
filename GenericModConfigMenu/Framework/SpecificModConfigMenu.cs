@@ -528,7 +528,7 @@ namespace GenericModConfigMenu.Framework
             this.drawMouse(b);
 
             // hover tooltips
-            if (Constants.TargetPlatform != GamePlatform.Android)
+            if (Constants.TargetPlatform != GamePlatform.Android && GetChildMenu() == null)
             {
                 foreach (var label in this.OptHovers)
                 {
