@@ -13,6 +13,7 @@ using SpaceCore.Interface;
 using SpaceCore.Patches;
 using SpaceShared;
 using SpaceShared.APIs;
+using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
 using StardewValley.Delegates;
@@ -341,25 +342,28 @@ namespace SpaceCore.VanillaAssetExpansion
                 SetupTriggerActionCache();
             }
 
-            foreach (var kvp in texs)
+            if (Context.ScreenId == 0)
             {
-                var texOverride = kvp.Value;
-                if (++texOverride.currFrameTick >= texOverride.animation.Frames[texOverride.currFrame].Duration)
+                foreach (var kvp in texs)
                 {
-                    texOverride.currFrameTick = 0;
-                    if (++texOverride.currFrame >= texOverride.animation.Frames.Length)
+                    var texOverride = kvp.Value;
+                    if (++texOverride.currFrameTick >= texOverride.animation.Frames[texOverride.currFrame].Duration)
                     {
-                        texOverride.currFrame = 0;
+                        texOverride.currFrameTick = 0;
+                        if (++texOverride.currFrame >= texOverride.animation.Frames.Length)
+                        {
+                            texOverride.currFrame = 0;
+                        }
+
+                        //Texture2D targetTex = Game1.content.Load<Texture2D>(kvp.Value.TargetTexture);
+                        Texture2D sourceTex = Game1.content.Load<Texture2D>(kvp.Value.animation.Frames[texOverride.currFrame].FilePath);
+                        int ind = kvp.Value.animation.Frames[texOverride.currFrame].SpriteIndex;
+                        int x = (ind * kvp.Value.TargetRect.Width) % sourceTex.Width;
+                        int y = (ind * kvp.Value.TargetRect.Width) / sourceTex.Width * kvp.Value.TargetRect.Height;
+
+                        kvp.Value.sourceTex = sourceTex;
+                        kvp.Value.sourceRectCache = new Rectangle(x, y, kvp.Value.TargetRect.Width, kvp.Value.TargetRect.Height);
                     }
-
-                    //Texture2D targetTex = Game1.content.Load<Texture2D>(kvp.Value.TargetTexture);
-                    Texture2D sourceTex = Game1.content.Load<Texture2D>(kvp.Value.animation.Frames[texOverride.currFrame].FilePath);
-                    int ind = kvp.Value.animation.Frames[texOverride.currFrame].SpriteIndex;
-                    int x = (ind * kvp.Value.TargetRect.Width) % sourceTex.Width;
-                    int y = (ind * kvp.Value.TargetRect.Width) / sourceTex.Width * kvp.Value.TargetRect.Height;
-
-                    kvp.Value.sourceTex = sourceTex;
-                    kvp.Value.sourceRectCache = new Rectangle(x, y, kvp.Value.TargetRect.Width, kvp.Value.TargetRect.Height);
                 }
             }
 
