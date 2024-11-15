@@ -20,20 +20,15 @@ namespace SpaceCore.VanillaAssetExpansion
             if (__instance is Skills.SkillBuff)
                 return;
 
-            if (!DataLoader.Buffs(Game1.content).TryGetValue(__instance.id, out var buff))
-                return;
-            if (buff.CustomFields == null)
+            if (__instance.customFields == null)
                 return;
 
-            if (buff.CustomFields.TryGetValue("spacechase0.SpaceCore/HealthRegeneration", out string valStr))
+            if (__instance.customFields.Any(b => b.Key.StartsWith("spacechase.SpaceCore.SkillBuff.") ||
+                                                 b.Key.StartsWith("spacechase0.SpaceCore.SkillBuff.") ||
+                                                 b.Key.StartsWith("spacechase0.SpaceCore/HealthRegeneration") ||
+                                                 b.Key.StartsWith("spacechase0.SpaceCore/StaminaRegeneration")))
             {
-                if (float.TryParse(valStr, out float val))
-                    Game1.player.GetExtData().HealthRegen += val;
-            }
-            if (buff.CustomFields.TryGetValue("spacechase0.SpaceCore/StaminaRegeneration", out valStr))
-            {
-                if (float.TryParse(valStr, out float val))
-                    Game1.player.GetExtData().StaminaRegen += val;
+                Game1.player.applyBuff(new Skills.SkillBuff(__instance, __instance.id, __instance.customFields));
             }
         }
     }
