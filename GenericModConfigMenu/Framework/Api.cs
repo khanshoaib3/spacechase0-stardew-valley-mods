@@ -24,6 +24,9 @@ namespace GenericModConfigMenu.Framework
         /// <summary>Open the config UI for a specific mod.</summary>
         private readonly Action<IManifest> OpenModMenuImpl;
 
+        /// <summary>Open the config UI for a specific mod, as a child menu.</summary>
+        private readonly Action<IManifest> OpenModMenuImplChild;
+
         private readonly IManifest mod;
 
         private readonly Action<string> DeprecationWarner;
@@ -34,11 +37,12 @@ namespace GenericModConfigMenu.Framework
         /// <summary>Construct an instance.</summary>
         /// <param name="configManager">Manages the registered mod config menus.</param>
         /// <param name="openModMenu">Open the config UI for a specific mod.</param>
-        internal Api(IManifest mod, ModConfigManager configManager, Action<IManifest> openModMenu, Action<string> DeprecationWarner)
+        internal Api(IManifest mod, ModConfigManager configManager, Action<IManifest> openModMenu, Action<IManifest> openModMenuChild, Action<string> DeprecationWarner)
         {
             this.mod = mod;
             this.ConfigManager = configManager;
             this.OpenModMenuImpl = openModMenu;
+            this.OpenModMenuImplChild = openModMenuChild;
             this.DeprecationWarner = DeprecationWarner;
         }
 
@@ -195,6 +199,14 @@ namespace GenericModConfigMenu.Framework
             mod ??= this.mod;
 
             this.OpenModMenuImpl(mod);
+        }
+
+        /// <inheritdoc />
+        public void OpenModMenuAsChildMenu(IManifest mod)
+        {
+            mod ??= this.mod;
+
+            this.OpenModMenuImplChild(mod);
         }
 
         /// <inheritdoc />

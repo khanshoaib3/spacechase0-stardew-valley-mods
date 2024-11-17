@@ -132,7 +132,7 @@ namespace GenericModConfigMenu
         /// <inheritdoc />
         public override object GetApi(IModInfo mod)
         {
-            return new Api(mod.Manifest, this.ConfigManager, mod => this.OpenModMenu(mod, page: null, listScrollRow: null), (s) => LogDeprecated( mod.Manifest.UniqueID, s));
+            return new Api(mod.Manifest, this.ConfigManager, mod => this.OpenModMenuLegacy(mod, page: null, listScrollRow: null), mod => this.OpenModMenu(mod, page: null, listScrollRow: null), (s) => LogDeprecated( mod.Manifest.UniqueID, s));
         }
 
 
@@ -154,6 +154,18 @@ namespace GenericModConfigMenu
         {
             Mod.ActiveConfigMenu = new ModConfigMenu(this.Config.ScrollSpeed, openModMenu: (mod, curScrollRow) => this.OpenModMenu(mod, page: null, listScrollRow: curScrollRow), openKeybindingsMenu: currScrollRow => OpenKeybindingsMenu( currScrollRow ), this.ConfigManager, this.Helper.GameContent.Load<Texture2D>(AssetManager.KeyboardButton), scrollRow);
         }
+        private void OpenListMenuLegacy(int? scrollRow = null)
+        {
+            var newMenu = new ModConfigMenu(this.Config.ScrollSpeed, openModMenu: (mod, curScrollRow) => this.OpenModMenuLegacy(mod, page: null, listScrollRow: curScrollRow), openKeybindingsMenu: currScrollRow => OpenKeybindingsMenuLegacy(currScrollRow), this.ConfigManager, this.Helper.GameContent.Load<Texture2D>(AssetManager.KeyboardButton), scrollRow); ;
+            if (Game1.activeClickableMenu is TitleMenu)
+            {
+                TitleMenu.subMenu = newMenu;
+            }
+            else
+            {
+                Game1.activeClickableMenu = newMenu;
+            }
+        }
 
         private void OpenKeybindingsMenu(int listScrollRow)
         {
@@ -168,6 +180,27 @@ namespace GenericModConfigMenu
                         Mod.ActiveConfigMenu = null;
                 }
             );
+        }
+
+        private void OpenKeybindingsMenuLegacy(int listScrollRow)
+        {
+            var newMenu = new SpecificModConfigMenu(
+                mods: this.ConfigManager,
+                scrollSpeed: this.Config.ScrollSpeed,
+                returnToList: () =>
+                {
+                    OpenListMenuLegacy(listScrollRow);
+                }
+            );
+            
+            if (Game1.activeClickableMenu is TitleMenu)
+            {
+                TitleMenu.subMenu = newMenu;
+            }
+            else
+            {
+                Game1.activeClickableMenu = newMenu;
+            }
         }
 
         /// <summary>Open the config UI for a specific mod.</summary>
@@ -196,6 +229,30 @@ namespace GenericModConfigMenu
                         Mod.ActiveConfigMenu = null;
                 }
             );
+        }
+
+        private void OpenModMenuLegacy(IManifest mod, string page, int? listScrollRow)
+        {
+            ModConfig config = this.ConfigManager.Get(mod, assert: true);
+
+            var newMenu = new SpecificModConfigMenu(
+                config: config,
+                scrollSpeed: this.Config.ScrollSpeed,
+                page: page,
+                openPage: newPage =>
+                {
+                    OpenModMenuLegacy(mod, newPage, listScrollRow);
+                },
+                returnToList: () =>
+                {
+                    OpenListMenuLegacy(listScrollRow);
+                }
+            );
+
+            if (Game1.activeClickableMenu is TitleMenu)
+                TitleMenu.subMenu = newMenu;
+            else
+                Game1.activeClickableMenu = newMenu;
         }
 
         private void SetupTitleMenuButton()
@@ -253,7 +310,7 @@ namespace GenericModConfigMenu
             // the texture.
             this.Helper.Events.GameLoop.UpdateTicking += this.FiveTicksAfterGameLaunched;
 
-            Api configMenu = new Api(ModManifest, this.ConfigManager, mod => this.OpenModMenu(mod, page: null, listScrollRow: null), (s) => LogDeprecated( ModManifest.UniqueID, s));
+            Api configMenu = new Api(ModManifest, this.ConfigManager, mod => this.OpenModMenuLegacy(mod, page: null, listScrollRow: null), mod => this.OpenModMenu(mod, page: null, listScrollRow: null), (s) => LogDeprecated( ModManifest.UniqueID, s));
 
             configMenu.Register(
                 mod: this.ModManifest,
