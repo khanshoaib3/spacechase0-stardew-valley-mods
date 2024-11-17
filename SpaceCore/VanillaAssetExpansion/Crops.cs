@@ -218,7 +218,7 @@ namespace SpaceCore.VanillaAssetExpansion
                 if (!GameStateQuery.CheckConditions(drop.PerItemCondition, new GameStateQueryContext(__instance.currentLocation, Game1.player, null, null, r2, null, new() { { "Tile", new Vector2(xTile, yTile) } } )))
                     continue;
 
-                var harvestedItems = ItemQueryResolver.TryResolve(drop, new ItemQueryContext(__instance.currentLocation, Game1.player, r2) );
+                var harvestedItems = ItemQueryResolver.TryResolve(drop, new ItemQueryContext(__instance.currentLocation, Game1.player, r2, "SpaceCore Crop Override Yields entry") );
                 foreach (var iqr in harvestedItems)
                 {
                     Item harvestedItem = iqr.Item as Item;

@@ -78,7 +78,7 @@ namespace SpaceCore.Dungeons
                 GenericSpawnItemDataWithCondition itemSpawn = itemSpawns.Choose(r);
                 if (itemSpawn == null)
                     continue;
-                Item item = ItemQueryResolver.TryResolveRandomItem(itemSpawn, new ItemQueryContext(location, player, r));
+                Item item = ItemQueryResolver.TryResolveRandomItem(itemSpawn, new ItemQueryContext(location, player, r, "SpaceCore Spawnable drops"));
                 drops.Add(item);
             }
 
@@ -408,7 +408,7 @@ namespace SpaceCore.Dungeons
             GenericSpawnItemDataWithCondition itemSpawn = itemSpawns.Choose(r);
             if ( itemSpawn == null )
                 return false;
-            Item item = ItemQueryResolver.TryResolveRandomItem(itemSpawn, new ItemQueryContext(location, null, r));
+            Item item = ItemQueryResolver.TryResolveRandomItem(itemSpawn, new ItemQueryContext(location, null, r, "SpaceCore Spawnable Forage drops"));
 
             StardewValley.Object obj = null;
             if (data.ForageableIsTillSpot)
@@ -530,7 +530,7 @@ namespace SpaceCore.Dungeons
             GenericSpawnItemDataWithCondition itemSpawn = itemSpawns.Choose(r);
             if (itemSpawn != null)
             {
-                Item item = ItemQueryResolver.TryResolveRandomItem(itemSpawn, new ItemQueryContext(location, null, r));
+                Item item = ItemQueryResolver.TryResolveRandomItem(itemSpawn, new ItemQueryContext(location, null, r, "SpaceCore Spawnable Furniture held object"));
                 furniture.heldObject.Value = item as StardewValley.Object;
             }
 
@@ -977,7 +977,7 @@ namespace SpaceCore.Dungeons
                 GenericSpawnItemDataWithCondition itemSpawn = itemSpawns.Choose(Game1.random);
                 if (itemSpawn != null)
                 {
-                    Item item = ItemQueryResolver.TryResolveRandomItem(itemSpawn, new ItemQueryContext(__instance.Location, t.getLastFarmerToUse(), Game1.random));
+                    Item item = ItemQueryResolver.TryResolveRandomItem(itemSpawn, new ItemQueryContext(__instance.Location, t.getLastFarmerToUse(), Game1.random, "SpaceCore Spawnable Large Minable shaving enchantment drops"));
 
                     Debris d = new Debris(item, new Vector2(tileLocation.X * 64f + 32f, (tileLocation.Y - 0.5f) * 64f + 32f), Game1.player.getStandingPosition());
                     d.Chunks[0].xVelocity.Value += (float)Game1.random.Next(-10, 11) / 10f;
