@@ -293,11 +293,11 @@ namespace SpaceCore.VanillaAssetExpansion
                         //Texture2D targetTex = Game1.content.Load<Texture2D>(newTex.Value.TargetTexture);
                         Texture2D sourceTex = Game1.content.Load<Texture2D>(newTex.Value.animation.Frames[0].FilePath);
                         int ind = newTex.Value.animation.Frames[0].SpriteIndex;
-                        int x = (ind * newTex.Value.TargetRect.Width) % sourceTex.Width;
-                        int y = (ind * newTex.Value.TargetRect.Width) / sourceTex.Width * newTex.Value.TargetRect.Height;
+                        int x = (ind * (newTex.Value.SourceSizeOverride?.X ?? newTex.Value.TargetRect.Width)) % sourceTex.Width;
+                        int y = (ind * (newTex.Value.SourceSizeOverride?.X ?? newTex.Value.TargetRect.Width)) / sourceTex.Width * (newTex.Value.SourceSizeOverride?.Y ?? newTex.Value.TargetRect.Height);
 
                         newTex.Value.sourceTex = sourceTex;
-                        newTex.Value.sourceRectCache = new Rectangle(x, y, newTex.Value.TargetRect.Width, newTex.Value.TargetRect.Height);
+                        newTex.Value.sourceRectCache = new Rectangle(x, y, newTex.Value.SourceSizeOverride?.X ?? newTex.Value.TargetRect.Width, newTex.Value.SourceSizeOverride?.Y ?? newTex.Value.TargetRect.Height);
                     }
                 }
 
@@ -358,11 +358,11 @@ namespace SpaceCore.VanillaAssetExpansion
                         //Texture2D targetTex = Game1.content.Load<Texture2D>(kvp.Value.TargetTexture);
                         Texture2D sourceTex = Game1.content.Load<Texture2D>(kvp.Value.animation.Frames[texOverride.currFrame].FilePath);
                         int ind = kvp.Value.animation.Frames[texOverride.currFrame].SpriteIndex;
-                        int x = (ind * kvp.Value.TargetRect.Width) % sourceTex.Width;
-                        int y = (ind * kvp.Value.TargetRect.Width) / sourceTex.Width * kvp.Value.TargetRect.Height;
+                        int x = (ind * (kvp.Value.SourceSizeOverride?.X ?? kvp.Value.TargetRect.Width)) % sourceTex.Width;
+                        int y = (ind * (kvp.Value.SourceSizeOverride?.X ?? kvp.Value.TargetRect.Width)) / sourceTex.Width * (kvp.Value.SourceSizeOverride?.Y ?? kvp.Value.TargetRect.Height);
 
                         kvp.Value.sourceTex = sourceTex;
-                        kvp.Value.sourceRectCache = new Rectangle(x, y, kvp.Value.TargetRect.Width, kvp.Value.TargetRect.Height);
+                        kvp.Value.sourceRectCache = new Rectangle(x, y, kvp.Value.SourceSizeOverride?.X ?? kvp.Value.TargetRect.Width, kvp.Value.SourceSizeOverride?.Y ?? kvp.Value.TargetRect.Height);
                     }
                 }
             }

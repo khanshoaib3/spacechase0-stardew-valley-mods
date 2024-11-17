@@ -20,6 +20,8 @@ namespace SpaceCore.VanillaAssetExpansion
             set { _sourcetex = value; animation = TextureAnimation.ParseFrom(SourceTexture); }
         }
 
+        public Point? SourceSizeOverride { get; set; } = null;
+
         internal Texture2D sourceTex;
         internal TextureAnimation animation;
         internal int currFrame = 0;

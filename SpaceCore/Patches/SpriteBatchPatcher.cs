@@ -83,30 +83,53 @@ namespace SpaceCore.Patches
             {
                 Rectangle rect = sourceRectangle.Value;
                 SpriteBatchPatcher.FixTilesheetReference(ref texture, ref rect);
+                if (sourceRectangle.Value.Width != rect.Width || sourceRectangle.Value.Height != rect.Height)
+                {
+                    scale = new(scale.X * (sourceRectangle.Value.Width / (float)rect.Width), scale.Y * (sourceRectangle.Value.Height / (float)rect.Height));
+                }
                 sourceRectangle = rect;
             }
         }
 
         /// <summary>The method to call before <see cref="SpriteBatch.Draw(Texture2D,Vector2,Rectangle?,Color,float,Vector2,float,SpriteEffects,float)"/>.</summary>
-        private static void Before_Draw_4(SpriteBatch __instance, ref Texture2D texture, Vector2 position, ref Rectangle? sourceRectangle, Color color, float rotation, Vector2 origin, float scale, SpriteEffects effects, float layerDepth)
+        private static bool Before_Draw_4(SpriteBatch __instance, ref Texture2D texture, Vector2 position, ref Rectangle? sourceRectangle, Color color, float rotation, Vector2 origin, float scale, SpriteEffects effects, float layerDepth)
         {
             if (sourceRectangle.HasValue)
             {
                 Rectangle rect = sourceRectangle.Value;
                 SpriteBatchPatcher.FixTilesheetReference(ref texture, ref rect);
+                if (sourceRectangle.Value.Width != rect.Width || sourceRectangle.Value.Height != rect.Height)
+                {
+                    Vector2 newScale = new(scale * (sourceRectangle.Value.Width / (float)rect.Width), scale * (sourceRectangle.Value.Height / (float)rect.Height));
+                    __instance.Draw(texture, position, rect, color, rotation, origin, newScale, effects, layerDepth);
+                    // There'll be another FixTilesheetReference call on the new values due to the
+                    // patch on the variant just called... probably harmless though
+                    return false;
+                }
                 sourceRectangle = rect;
             }
+
+            return true;
         }
 
         /// <summary>The method to call before <see cref="SpriteBatch.Draw(Texture2D,Vector2,Rectangle?,Color)"/>.</summary>
-        private static void Before_Draw_5(SpriteBatch __instance, ref Texture2D texture, Vector2 position, ref Rectangle? sourceRectangle, Color color)
+        private static bool Before_Draw_5(SpriteBatch __instance, ref Texture2D texture, Vector2 position, ref Rectangle? sourceRectangle, Color color)
         {
             if (sourceRectangle.HasValue)
             {
                 Rectangle rect = sourceRectangle.Value;
                 SpriteBatchPatcher.FixTilesheetReference(ref texture, ref rect);
+                if (sourceRectangle.Value.Width != rect.Width || sourceRectangle.Value.Height != rect.Height)
+                {
+                    __instance.Draw(texture, new Rectangle( (int)position.X, (int)position.Y, sourceRectangle.Value.Width, sourceRectangle.Value.Height), rect, color);
+                    // There'll be another FixTilesheetReference call on the new values due to the
+                    // patch on the variant just called... probably harmless though
+                    return false;
+                }
                 sourceRectangle = rect;
             }
+
+            return true;
         }
 
         private static void FixTilesheetReference(ref Texture2D tex, ref Rectangle sourceRect)
