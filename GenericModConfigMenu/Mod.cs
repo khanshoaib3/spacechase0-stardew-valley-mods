@@ -122,7 +122,7 @@ namespace GenericModConfigMenu
                     return false;
                 }
 
-                OpenModMenu(manifest, null, null);
+                OpenModMenuNew(manifest, null, null);
 
                 error = null;
                 return true;
@@ -132,7 +132,7 @@ namespace GenericModConfigMenu
         /// <inheritdoc />
         public override object GetApi(IModInfo mod)
         {
-            return new Api(mod.Manifest, this.ConfigManager, mod => this.OpenModMenuLegacy(mod, page: null, listScrollRow: null), mod => this.OpenModMenu(mod, page: null, listScrollRow: null), (s) => LogDeprecated( mod.Manifest.UniqueID, s));
+            return new Api(mod.Manifest, this.ConfigManager, mod => this.OpenModMenu(mod, page: null, listScrollRow: null), mod => this.OpenModMenuNew(mod, page: null, listScrollRow: null), (s) => LogDeprecated( mod.Manifest.UniqueID, s));
         }
 
 
@@ -150,13 +150,13 @@ namespace GenericModConfigMenu
 
         /// <summary>Open the menu which shows a list of configurable mods.</summary>
         /// <param name="scrollRow">The initial scroll position, represented by the row index at the top of the visible area.</param>
+        private void OpenListMenuNew(int? scrollRow = null)
+        {
+            Mod.ActiveConfigMenu = new ModConfigMenu(this.Config.ScrollSpeed, openModMenu: (mod, curScrollRow) => this.OpenModMenuNew(mod, page: null, listScrollRow: curScrollRow), openKeybindingsMenu: currScrollRow => OpenKeybindingsMenuNew( currScrollRow ), this.ConfigManager, this.Helper.GameContent.Load<Texture2D>(AssetManager.KeyboardButton), scrollRow);
+        }
         private void OpenListMenu(int? scrollRow = null)
         {
-            Mod.ActiveConfigMenu = new ModConfigMenu(this.Config.ScrollSpeed, openModMenu: (mod, curScrollRow) => this.OpenModMenu(mod, page: null, listScrollRow: curScrollRow), openKeybindingsMenu: currScrollRow => OpenKeybindingsMenu( currScrollRow ), this.ConfigManager, this.Helper.GameContent.Load<Texture2D>(AssetManager.KeyboardButton), scrollRow);
-        }
-        private void OpenListMenuLegacy(int? scrollRow = null)
-        {
-            var newMenu = new ModConfigMenu(this.Config.ScrollSpeed, openModMenu: (mod, curScrollRow) => this.OpenModMenuLegacy(mod, page: null, listScrollRow: curScrollRow), openKeybindingsMenu: currScrollRow => OpenKeybindingsMenuLegacy(currScrollRow), this.ConfigManager, this.Helper.GameContent.Load<Texture2D>(AssetManager.KeyboardButton), scrollRow); ;
+            var newMenu = new ModConfigMenu(this.Config.ScrollSpeed, openModMenu: (mod, curScrollRow) => this.OpenModMenuNew(mod, page: null, listScrollRow: curScrollRow), openKeybindingsMenu: currScrollRow => OpenKeybindingsMenuNew(currScrollRow), this.ConfigManager, this.Helper.GameContent.Load<Texture2D>(AssetManager.KeyboardButton), scrollRow); ;
             if (Game1.activeClickableMenu is TitleMenu)
             {
                 TitleMenu.subMenu = newMenu;
@@ -167,7 +167,7 @@ namespace GenericModConfigMenu
             }
         }
 
-        private void OpenKeybindingsMenu(int listScrollRow)
+        private void OpenKeybindingsMenuNew(int listScrollRow)
         {
             Mod.ActiveConfigMenu = new SpecificModConfigMenu(
                 mods: this.ConfigManager,
@@ -175,21 +175,21 @@ namespace GenericModConfigMenu
                 returnToList: () =>
                 {
                     if (Game1.activeClickableMenu is TitleMenu)
-                        OpenListMenu(listScrollRow);
+                        OpenListMenuNew(listScrollRow);
                     else
                         Mod.ActiveConfigMenu = null;
                 }
             );
         }
 
-        private void OpenKeybindingsMenuLegacy(int listScrollRow)
+        private void OpenKeybindingsMenu(int listScrollRow)
         {
             var newMenu = new SpecificModConfigMenu(
                 mods: this.ConfigManager,
                 scrollSpeed: this.Config.ScrollSpeed,
                 returnToList: () =>
                 {
-                    OpenListMenuLegacy(listScrollRow);
+                    OpenListMenuNew(listScrollRow);
                 }
             );
             
@@ -207,7 +207,7 @@ namespace GenericModConfigMenu
         /// <param name="mod">The mod whose config menu to display.</param>
         /// <param name="page">The page to display within the mod's config menu.</param>
         /// <param name="listScrollRow">The scroll position to set in the mod list when returning to it, represented by the row index at the top of the visible area.</param>
-        private void OpenModMenu(IManifest mod, string page, int? listScrollRow)
+        private void OpenModMenuNew(IManifest mod, string page, int? listScrollRow)
         {
             ModConfig config = this.ConfigManager.Get(mod, assert: true);
 
@@ -219,19 +219,19 @@ namespace GenericModConfigMenu
                 {
                     if (!(Game1.activeClickableMenu is TitleMenu))
                         Mod.ActiveConfigMenu = null;
-                    this.OpenModMenu(mod, newPage, listScrollRow);
+                    this.OpenModMenuNew(mod, newPage, listScrollRow);
                 },
                 returnToList: () =>
                 {
                     if (Game1.activeClickableMenu is TitleMenu)
-                        OpenListMenu(listScrollRow);
+                        OpenListMenuNew(listScrollRow);
                     else
                         Mod.ActiveConfigMenu = null;
                 }
             );
         }
 
-        private void OpenModMenuLegacy(IManifest mod, string page, int? listScrollRow)
+        private void OpenModMenu(IManifest mod, string page, int? listScrollRow)
         {
             ModConfig config = this.ConfigManager.Get(mod, assert: true);
 
@@ -241,11 +241,11 @@ namespace GenericModConfigMenu
                 page: page,
                 openPage: newPage =>
                 {
-                    OpenModMenuLegacy(mod, newPage, listScrollRow);
+                    OpenModMenuNew(mod, newPage, listScrollRow);
                 },
                 returnToList: () =>
                 {
-                    OpenListMenuLegacy(listScrollRow);
+                    OpenListMenuNew(listScrollRow);
                 }
             );
 
@@ -268,7 +268,7 @@ namespace GenericModConfigMenu
                     Callback = _ =>
                     {
                         Game1.playSound("newArtifact");
-                        this.OpenListMenu();
+                        this.OpenListMenuNew();
                     }
                 };
 
@@ -310,7 +310,7 @@ namespace GenericModConfigMenu
             // the texture.
             this.Helper.Events.GameLoop.UpdateTicking += this.FiveTicksAfterGameLaunched;
 
-            Api configMenu = new Api(ModManifest, this.ConfigManager, mod => this.OpenModMenuLegacy(mod, page: null, listScrollRow: null), mod => this.OpenModMenu(mod, page: null, listScrollRow: null), (s) => LogDeprecated( ModManifest.UniqueID, s));
+            Api configMenu = new Api(ModManifest, this.ConfigManager, mod => this.OpenModMenu(mod, page: null, listScrollRow: null), mod => this.OpenModMenuNew(mod, page: null, listScrollRow: null), (s) => LogDeprecated( ModManifest.UniqueID, s));
 
             configMenu.Register(
                 mod: this.ModManifest,
@@ -396,7 +396,7 @@ namespace GenericModConfigMenu
             if (e.NewMenu is GameMenu menu)
             {
                 OptionsPage page = (OptionsPage)menu.pages[GameMenu.optionsTab];
-                page.options.Add(new OptionsButton(I18n.Button_ModOptions(), () => this.OpenListMenu()));
+                page.options.Add(new OptionsButton(I18n.Button_ModOptions(), () => this.OpenListMenuNew()));
             }
         }
 
@@ -407,7 +407,7 @@ namespace GenericModConfigMenu
         {
             // open menu
             if (Context.IsPlayerFree && this.Config.OpenMenuKey.JustPressed())
-                this.OpenListMenu();
+                this.OpenListMenuNew();
 
             // pass input to menu
             else if (Mod.ActiveConfigMenu is SpecificModConfigMenu menu && e.Button.TryGetKeyboard(out Keys key))

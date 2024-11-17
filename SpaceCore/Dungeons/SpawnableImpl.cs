@@ -1030,7 +1030,7 @@ namespace SpaceCore.Dungeons
                 r = Utility.CreateRandom(Game1.uniqueIDForThisGame, Game1.stats.DaysPlayed, (double)tileLocation.X * 7.0, (double)tileLocation.Y * 11.0);
             }
 
-            foreach (var drop in spawnDef.BreakableDrops.SimplifyDrops(__instance.Location, t.getLastFarmerToUse(), r))
+            foreach (var drop in spawnDef.LargeMinableDrops.SimplifyDrops(__instance.Location, t.getLastFarmerToUse(), r))
                 Game1.createItemDebris(drop, new Vector2(tileLocation.X + __instance.width.Value / 2f, tileLocation.Y + __instance.height.Value / 2f) * Game1.tileSize, t.getLastFarmerToUse().FacingDirection, location);
 
             if (spawnDef.LargeMinableExperienceGranted > 0)
