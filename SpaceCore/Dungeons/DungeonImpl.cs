@@ -576,7 +576,9 @@ namespace SpaceCore.Dungeons
             {
                 Game1.player.Position = entranceTile.ToVector2() * Game1.tileSize;
             }
-            __instance.forceViewportPlayerFollow = true;
+
+            var dungeonsData = Game1.content.Load<Dictionary<string, DungeonData>>("spacechase0.SpaceCore/Dungeons");
+            __instance.forceViewportPlayerFollow = dungeonsData[ext.spaceCoreDungeonId.Value].ViewportFollowsPlayer;
 
             var deepestLevels = DungeonImpl.deepestLevels.GetOrCreateValue(Game1.player.team);
             deepestLevels.TryGetValue(ext.spaceCoreDungeonId.Value, out int deepest);

@@ -225,6 +225,7 @@ Provided functionality for content pack authors:
             * `spacechase0.SpaceCore_DungeonLadderEntrance x y` - Where the palyer is placed when entering the location via ladder or entering the dungeon.
             * `spacechase0.SpaceCore_DungeonElevatorEntrance x y` - Where the player is placed when entering the location via an elevator.
     * The dungeon data itself lives in `spacechase0.SpaceCore/Dungeons`, which is a dictionary with the dungeon ID being the key, and a model containing the following values:
+        * `ViewportFollowsPlayer` - Default true. If true, the viewport will follow the player no matter where they are in the level (lines the mines). If false, the viewport will be clamped to the edges of the map.
         * `LadderExitLocation` - The location name of the place to be taken to when exiting through `spacechase0.SpaceCore_DungeonLadderExit`.
         * `LadderExitTile` - The position in the location above to to be taken to.
         * `ElevatorExitLocation` - The location name of the place to be taken to when exiting through floor 0 of `spacechase0.SpaceCore_DungeonElevatorMenu dungeonId`.

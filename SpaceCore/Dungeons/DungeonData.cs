@@ -53,6 +53,7 @@ namespace SpaceCore.Dungeons
         public int MineshaftTileIndex { get; set; } = 174;
 
         public int AdditionalTimeMilliseconds { get; set; } = 2000;
+        public bool ViewportFollowsPlayer { get; set; } = true;
 
         public int GetMaxLevel()
         {
