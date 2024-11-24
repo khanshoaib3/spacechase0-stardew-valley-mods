@@ -12,6 +12,7 @@ using SpaceShared;
 using SpaceShared.APIs;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
+using StardewModdingAPI.Utilities;
 using StardewValley;
 using StardewValley.Menus;
 using StardewValley.Network;
@@ -214,11 +215,21 @@ namespace SpaceCore
         private const string MsgExperience = "spacechase0.SpaceCore.SkillExperience";
         private const string MsgBuffs = "spacechase0.SpaceCore.SkillBuffs";
 
+        internal class SkillState
+        {
+            public Dictionary<long, Dictionary<string, int>> Exp = new();
+            // MultiplayerID => SkillID => BuffID => Level
+            public Dictionary<long, Dictionary<string, Dictionary<string, int>>> Buffs = new();
+            public List<KeyValuePair<string, int>> NewLevels = new();
+        }
+
         internal static Dictionary<string, Skill> SkillsByName = new(StringComparer.OrdinalIgnoreCase);
-        private static Dictionary<long, Dictionary<string, int>> Exp = new();
-        // MultiplayerID => SkillID => BuffID => Level
-        private static Dictionary<long, Dictionary<string, Dictionary<string, int>>> Buffs = new();
-        internal static List<KeyValuePair<string, int>> NewLevels = new();
+        private static PerScreen<SkillState> _State = new(() => new SkillState());
+        internal static SkillState State => _State.Value;
+        // So I don't have to change very single reference now that I moved things to SkillState
+        private static Dictionary<long, Dictionary<string, int>> Exp => State.Exp;
+        private static Dictionary<long, Dictionary<string, Dictionary<string, int>>> Buffs => State.Buffs;
+        private static List<KeyValuePair<string, int>> NewLevels => State.NewLevels;
 
         private static IExperienceBarsApi? BarsApi;
 
@@ -635,10 +646,10 @@ namespace SpaceCore
         {
             if (Context.IsMainPlayer)
             {
-                Skills.Exp = Skills.DataApi.ReadSaveData<Dictionary<long, Dictionary<string, int>>>(Skills.DataKey);
-                if (Skills.Exp == null && File.Exists(Skills.LegacyFilePath))
-                    Skills.Exp = JsonConvert.DeserializeObject<Dictionary<long, Dictionary<string, int>>>(File.ReadAllText(Skills.LegacyFilePath));
-                Skills.Exp ??= new Dictionary<long, Dictionary<string, int>>();
+                State.Exp = Skills.DataApi.ReadSaveData<Dictionary<long, Dictionary<string, int>>>(Skills.DataKey);
+                if (State.Exp == null && File.Exists(Skills.LegacyFilePath))
+                    State.Exp = JsonConvert.DeserializeObject<Dictionary<long, Dictionary<string, int>>>(File.ReadAllText(Skills.LegacyFilePath));
+                State.Exp ??= new Dictionary<long, Dictionary<string, int>>();
             }
         }
 
