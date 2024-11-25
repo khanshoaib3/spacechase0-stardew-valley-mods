@@ -229,7 +229,7 @@ namespace SpaceCore
         // So I don't have to change very single reference now that I moved things to SkillState
         private static Dictionary<long, Dictionary<string, int>> Exp => State.Exp;
         private static Dictionary<long, Dictionary<string, Dictionary<string, int>>> Buffs => State.Buffs;
-        private static List<KeyValuePair<string, int>> NewLevels => State.NewLevels;
+        internal static List<KeyValuePair<string, int>> NewLevels => State.NewLevels;
 
         private static IExperienceBarsApi? BarsApi;
 

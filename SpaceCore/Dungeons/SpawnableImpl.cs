@@ -781,7 +781,7 @@ namespace SpaceCore.Dungeons
         }
     }
 
-    [HarmonyPatch(typeof(StardewValley.Object), nameof(StardewValley.Object.IsBreakableStone))]
+    [HarmonyPatch(typeof(StardewValley.Object), nameof(StardewValley.Object.isForage))]
     public static class ObjectIsForageSpawnablePatch
     {
         public static void Postfix(StardewValley.Object __instance, ref bool __result)
@@ -1226,6 +1226,7 @@ namespace SpaceCore.Dungeons
         public static string prevent = null;
         public static bool Prefix(Item item)
         {
+            if (item == null) return true; // The original method will error in this case anyways, but at least people won't blame SpaceCore for it then (since it's another mod causing it)
             if (item.QualifiedItemId == prevent)
                 return false;
 
