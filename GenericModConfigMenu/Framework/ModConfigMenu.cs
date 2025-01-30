@@ -86,6 +86,7 @@ namespace GenericModConfigMenu.Framework
                         Label label = new Label
                         {
                             String = entry.ModName,
+                            ScreenReaderText = $"{entry.ModName}, {entry.ModManifest.Description}",
                             UserData = entry.ModManifest.Description,
                             Callback = _ => this.ChangeToModPage(entry.ModManifest)
                         };
@@ -137,6 +138,7 @@ namespace GenericModConfigMenu.Framework
             {
                 LocalPosition = this.Table.LocalPosition - new Vector2( keybindingsTex.Width / 2 + 32, 0 ),
                 Callback = _ => openKeybindingsMenu( this.ScrollRow),
+                ScreenReaderText = I18n.List_Keybindings(), // TODO Maybe add "Keybindings Menu" entry
             };
             this.Ui.AddChild(button);
 
